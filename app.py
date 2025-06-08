@@ -63,13 +63,20 @@ def format_alignment(ref_seq, ab1_seq, alignment):
     return result.strip()
 
 def resolve_ambiguity(base1, base2):
-    if base1 == base2:
+    """Return True if two bases are compatible considering IUPAC codes."""
+    b1 = base1.upper()
+    b2 = base2.upper()
+
+    # Direct equality check first
+    if b1 == b2:
         return True
-    if base1 in IUPAC_CODES and base2 in IUPAC_CODES[base1]:
-        return True
-    if base2 in IUPAC_CODES and base1 in IUPAC_CODES[base2]:
-        return True
-    return False
+
+    # Expand ambiguous codes into sets of possible bases
+    set1 = set(IUPAC_CODES.get(b1, [b1]))
+    set2 = set(IUPAC_CODES.get(b2, [b2]))
+
+    # Bases are compatible if they share at least one possibility
+    return not set1.isdisjoint(set2)
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
